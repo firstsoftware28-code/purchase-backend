@@ -9,12 +9,32 @@ app.use(cors());
 app.use(express.json());
 
 /* =========================
+   DATABASE CONNECTION TEST
+========================= */
+prisma.$connect()
+  .then(() => {
+    console.log("DATABASE CONNECTED");
+  })
+  .catch((err) => {
+    console.error("DATABASE ERROR:", err);
+  });
+
+/* =========================
    TEST ROUTE
 ========================= */
-app.get("/", (req, res) => {
-  res.json({
-    message: "Purchasing Backend Running"
-  });
+app.get("/", async (req, res) => {
+  try {
+    const count = await prisma.purchase.count();
+
+    res.json({
+      message: "Backend Running",
+      totalEntries: count
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err.message
+    });
+  }
 });
 
 /* =========================
