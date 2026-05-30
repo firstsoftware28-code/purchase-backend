@@ -28,11 +28,11 @@ app.get("/", async (req, res) => {
 
     res.json({
       message: "Backend Running",
-      totalEntries: count
+      totalEntries: count,
     });
   } catch (err) {
     res.status(500).json({
-      error: err.message
+      error: err.message,
     });
   }
 });
@@ -90,16 +90,36 @@ app.get("/entries/:id", async (req, res) => {
 ========================= */
 app.post("/entries", async (req, res) => {
   try {
+    const body = req.body;
+
     const data = await prisma.purchase.create({
-      data: req.body,
+      data: {
+        date: body.date || "",
+        description: body.description || "",
+
+        rate: Number(body.rate) || 0,
+        qty: Number(body.qty) || 0,
+        amount: Number(body.amount) || 0,
+
+        company: body.company || "",
+        project: body.project || "",
+        partyName: body.partyName || "",
+        partyNumber: body.partyNumber || "",
+
+        givenPayment: Number(body.givenPayment) || 0,
+        remainingPayment: Number(body.remainingPayment) || 0,
+
+        status: body.status || "Pending",
+        note: body.note || "",
+      },
     });
 
     res.status(201).json(data);
   } catch (error) {
-    console.error(error);
+    console.error("CREATE ERROR:", error);
 
     res.status(500).json({
-      error: "Failed to create entry",
+      error: error.message,
     });
   }
 });
@@ -110,10 +130,29 @@ app.post("/entries", async (req, res) => {
 app.put("/entries/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
+    const body = req.body;
 
     const updated = await prisma.purchase.update({
       where: { id },
-      data: req.body,
+      data: {
+        date: body.date,
+        description: body.description,
+
+        rate: Number(body.rate) || 0,
+        qty: Number(body.qty) || 0,
+        amount: Number(body.amount) || 0,
+
+        company: body.company,
+        project: body.project,
+        partyName: body.partyName,
+        partyNumber: body.partyNumber,
+
+        givenPayment: Number(body.givenPayment) || 0,
+        remainingPayment: Number(body.remainingPayment) || 0,
+
+        status: body.status,
+        note: body.note,
+      },
     });
 
     res.json(updated);
@@ -121,7 +160,7 @@ app.put("/entries/:id", async (req, res) => {
     console.error(error);
 
     res.status(500).json({
-      error: "Failed to update entry",
+      error: error.message,
     });
   }
 });
@@ -144,7 +183,7 @@ app.delete("/entries/:id", async (req, res) => {
     console.error(error);
 
     res.status(500).json({
-      error: "Delete failed",
+      error: error.message,
     });
   }
 });
